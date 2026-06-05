@@ -5,34 +5,45 @@ const [task, setTask] = useState("");
 const [tasks, setTasks] = useState([]);
 const [showAbout,setShowAbout]= useState(false);
 const [activeIndex,setActiveIndex]=useState(null);
+
 useEffect(()=>{
+
   gettodos();
+
 },[]);
 
 let activeTask =
-  tasks.find(task => task.id === activeIndex);    
+    tasks.find(task => task.id === activeIndex);    
 
 function handleAbout(id) {
   if (showAbout && activeIndex === id) {
+
     setShowAbout(false);
     setActiveIndex(null);
+
   } else {
+
     setActiveIndex(id);
     setShowAbout(true);
+
   }
 }
 
 // get todo
 async function gettodos(){
+
   const response= await fetch(
     "http://localhost:3000/todos",
   )
+
   const todos=await response.json();
   setTasks(todos);
+
 }
 
 // addtodo
 async function addtodo(e){
+
  e.preventDefault();
   if (!task.trim()) return;
 
@@ -53,21 +64,25 @@ async function addtodo(e){
   );
   setTask("");
   await gettodos();
+
 }
 
 //delete todo
 async function deletetask(i){
+
   await fetch(
     `http://localhost:3000/todos/${i}`,
     {
       method:"delete",
     }
   )
+
  await gettodos();
 }
 
 //update about
 async function updatedone(task,done){
+
   await fetch(
     `http://localhost:3000/todos/${task.id}`,
     {
@@ -84,11 +99,13 @@ async function updatedone(task,done){
     }
 
   )
+
   await gettodos();
 }
 
 // update about
 async function updateabout(task,about){
+
   await fetch(
     `http://localhost:3000/todos/${task.id}`,
   
@@ -104,6 +121,7 @@ async function updateabout(task,about){
     })
   }
  )
+ 
  await gettodos();
 }
 

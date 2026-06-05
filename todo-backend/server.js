@@ -1,58 +1,114 @@
 import express from "express"
 import cors from "cors"
+import pg from "pg"
+import dotenv from "dotenv";
 
+dotenv.config();
+
+const {Pool}=pg
 const app=express();
 
 app.use(express.json());
 app.use(cors())
-const todos=[];
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
+// const pool = new Pool({
+//     user: "postgres",
+//     host: "localhost",
+//     database: "postgres",
+//     password: "password",
+//     port: 5432
+// });
+
+pool.connect()
+.then(() => {
+    console.log("PostgreSQL Connected");
+})
+.catch(err => {
+    console.log(err);
+});
 
 app.get('/',(req,res)=>{
     res.send("todos api running");
-})
+});
 
-app.get('/todos',(req,res)=>{
-    res.json(todos);
-})
+app.get('/todos',async (req,res)=>{
 
-app.post('/todos',(req,res)=>{
-    const todo={
-        id:Date.now(),
-        todo:req.body.todo,
-        about:req.body.about,
-        done:req.body.done
-    };
-    todos.push(todo);
+    try{
 
-    res.json(todos);
-})
+        const result= await pool.query(
+            "select * from todos order by id "
+        );
 
-app.put('/todos/:id',(req,res)=>{
-    const id=Number(req.params.id);
+        res.json(result.rows);
 
-    const task=
-    todos.find(todo=>todo.id===id);
+    }catch(err){
+        console.log(err.message);
+    }
+});
 
-    if(task){
-        task.todo=req.body.todo;
-        task.about=req.body.about;
-        task.done=req.body.done;
+app.post('/todos',async (req,res)=>{
+
+    try{
+        const{todo,about,done}=req.body;
+
+        const result = await pool.query(
+            "insert into todos (todo,about,done) values ($1,$2,$3) returning *",
+            [todo,about,done])
+
+            res.json(result.rows[0]
+
+        );
+    }
+    catch(err){
+
+        console.log(err.message)
+
+    }
+});
+
+app.put('/todos/:id',async (req,res)=>{
+
+    try{
+
+        const id=Number(req.params.id);
+
+        const{todo,about,done}=req.body;
+
+        await pool.query(
+            "UPDATE todos SET todo=$1, about=$2, done=$3 WHERE id=$4",
+            [todo,about,done,id]
+
+        )
+        res.json("todo updted");
+
+    }catch(err){
+        console.log(err.message);
     }
 
-   res.json(todos);
+});
 
-})
+app.delete('/todos/:id',async (req,res)=>{
+    try{
+        const id=Number(req.params.id);
 
-app.delete('/todos/:id',(req,res)=>{
-    const id=Number(req.params.id);
+        await pool.query(
+            "DELETE from todos where id=$1",
+            [id]
 
-    const filtered=
-    todos.filter(todo=>todo.id!==id);
+        );
+        res.json("todos updated")
 
-    todos.length=0;
-    todos.push(...filtered);
-    res.json(todos);
-})
+    }catch(err){
+        console.log(err.message);
+    }
+});
 
 app.listen((3000),()=>{
     console.log("api is running at port 3000");
