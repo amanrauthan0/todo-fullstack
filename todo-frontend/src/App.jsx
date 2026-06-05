@@ -1,7 +1,7 @@
 
 import './App.css'
-import Header from './components/header'
-import List from './components/list'
+import Header from './components/Header'
+import List from './components/List'
 
 function App() {
 
