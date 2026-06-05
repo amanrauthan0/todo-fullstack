@@ -6,6 +6,8 @@ const [tasks, setTasks] = useState([]);
 const [showAbout,setShowAbout]= useState(false);
 const [activeIndex,setActiveIndex]=useState(null);
 
+const API = import.meta.env.VITE_API_URL;
+
 useEffect(()=>{
 
   gettodos();
@@ -33,7 +35,7 @@ function handleAbout(id) {
 async function gettodos(){
 
   const response= await fetch(
-    "http://localhost:3000/todos",
+    `${API}/todos`,
   )
 
   const todos=await response.json();
@@ -48,11 +50,11 @@ async function addtodo(e){
   if (!task.trim()) return;
 
   await fetch(
-    "http://localhost:3000/todos",
+    `${API}/todos`,
     {
       method:"POST",
       headers:{
-        "Content-Type":"application/JSON"
+        "Content-Type":"application/json"
       },
       body:JSON.stringify(
         {todo:task,
@@ -71,7 +73,7 @@ async function addtodo(e){
 async function deletetask(i){
 
   await fetch(
-    `http://localhost:3000/todos/${i}`,
+    `${API}/todos/${i}`,
     {
       method:"delete",
     }
@@ -84,11 +86,11 @@ async function deletetask(i){
 async function updatedone(task,done){
 
   await fetch(
-    `http://localhost:3000/todos/${task.id}`,
+    `${API}/todos/${task.id}`,
     {
       method:"PUT",
       headers:{
-        "Content-Type":"application/JSON",
+        "Content-Type":"application/json",
       },
 
       body:JSON.stringify({
@@ -100,19 +102,19 @@ async function updatedone(task,done){
 
   )
 
-  await gettodos();
+
 }
 
 // update about
 async function updateabout(task,about){
 
   await fetch(
-    `http://localhost:3000/todos/${task.id}`,
+    `${API}/todos/${task.id}`,
   
   {
     method:"PUT",
     headers:{
-      "Content-Type":"application/JSON"
+      "Content-Type":"application/json"
     },
 
     body:JSON.stringify({
@@ -121,8 +123,7 @@ async function updateabout(task,about){
     })
   }
  )
- 
- await gettodos();
+
 }
 
 
